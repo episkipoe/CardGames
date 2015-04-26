@@ -17,7 +17,7 @@ public class Hand {
 	}
 
 	/**
-	 * @return  A hand containing every card
+	 * @return A hand containing every card
 	 */
 	public static Hand getDeck() {
 		List<Card> cards = new ArrayList<>();
@@ -27,6 +27,12 @@ public class Hand {
 			}
 		}
 		return new Hand(cards);
+	}
+
+	public static Hand getShuffledDeck() {
+		Hand deck = getDeck();
+		deck.shuffle();
+		return deck;
 	}
 
 	/**
@@ -39,21 +45,32 @@ public class Hand {
 	public void addCard(Card card) {
 		cards.add(card);
 	}
+
+	public boolean addCard(Optional<Card> card) {
+		if(card.isPresent()) {
+			cards.add(card.get());
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void addCards(Collection<Card> cardsToAdd) {
 		cards.addAll(cardsToAdd);
 	}
 
 	/**
-	 * @param nHands  generate this many hands
+	 * @param nHands generate this many hands
 	 * @return a list of n hands
+	 *   all cards will be dealt
 	 */
 	public List<Hand> deal(int nHands) {
 		List<Hand> hands = new ArrayList<>();
-		for (int i = 0 ; i < nHands ; i++) {
+		for (int i = 0; i < nHands; i++) {
 			hands.add(new Hand());
 		}
-		int i=0;
-		for (Iterator<Card> iterator = cards.iterator() ; iterator.hasNext();) {
+		int i = 0;
+		for (Iterator<Card> iterator = cards.iterator(); iterator.hasNext(); ) {
 			Card card = iterator.next();
 			hands.get(i++ % nHands).addCard(card);
 			iterator.remove();
@@ -62,10 +79,28 @@ public class Hand {
 	}
 
 	/**
+	 * @return a list of n hands, each will have nCardsPerHand (if enough are available in the deck)
+	 */
+	public List<Hand> deal(int nHands, int nCardsPerHand) {
+		List<Hand> hands = new ArrayList<>();
+		for (int i = 0; i < nHands; i++) {
+			Hand hand = new Hand();
+			for (int j = 0 ; j < nCardsPerHand ; j++) {
+				Optional<Card> card = draw();
+				if (card.isPresent()) {
+					hand.addCard(card.get());
+				}
+			}
+			hands.add(hand);
+		}
+		return hands;
+	}
+
+	/**
 	 * @return the next card.  it will be removed from the hand
 	 */
 	public Optional<Card> draw() {
-		if(cards.isEmpty()) {
+		if (cards.isEmpty()) {
 			return Optional.empty();
 		}
 		return Optional.ofNullable(cards.remove(0));
@@ -78,5 +113,5 @@ public class Hand {
 	public boolean isEmpty() {
 		return cards.isEmpty();
 	}
-	
+
 }
