@@ -11,14 +11,24 @@ import java.util.List;
 import java.util.Optional;
 
 public class War implements CardGame {
-	private final Hand playerOne;
-	private final Hand playerTwo;
+	private Hand playerOne;
+	private Hand playerTwo;
 	private String gameStatus;
 	private final List<Card> cardsInBattle = new ArrayList<>();
+
+	public War() {
+	}
 
 	public War(Hand playerOne, Hand playerTwo) {
 		this.playerOne = playerOne;
 		this.playerTwo = playerTwo;
+	}
+
+	@Override
+	public void start() {
+		List<Hand> hands = Hand.getShuffledDeck().deal(2);
+		this.playerOne = hands.get(0);
+		this.playerTwo = hands.get(1);
 	}
 
 	@Override

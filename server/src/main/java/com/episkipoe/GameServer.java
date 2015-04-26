@@ -4,13 +4,11 @@ import com.episkipoe.games.CardGame;
 import com.google.gson.Gson;
 
 import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MultivaluedMap;
 
-@Path("/games/{game}/{data}")
 @RequestScoped
+@Path("/games/{game}")
 public class GameServer {
 
 	/**
@@ -22,15 +20,27 @@ public class GameServer {
 	 */
 	@GET
 	@Produces("text/json")
-	public String play(@PathParam("game") String gameClass, @PathParam("data") String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+	public String get(@PathParam("game") String gameClass, @QueryParam("data") String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+		return play(gameClass, data);
+	}
+
+	@POST
+	@Produces("text/json")
+	public String post(@PathParam("game") String gameClass, MultivaluedMap<String, String> formParams) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+		return play(gameClass, formParams.getFirst("data"));
+	}
+
+	private String play(String gameClass, String data) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 		Class clazz = Class.forName(gameClass);
 		CardGame game;
 		if (data.equals("new")) {
 			game = (CardGame) clazz.newInstance();
+			game.start();
 		} else {
 			game = (CardGame) new Gson().fromJson(data, clazz);
 			game.next();
 		}
 		return new Gson().toJson(game);
 	}
+
 }

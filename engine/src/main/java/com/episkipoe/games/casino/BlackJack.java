@@ -8,8 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BlackJack implements CardGame {
 	private Hand deck;
@@ -17,11 +17,16 @@ public class BlackJack implements CardGame {
 	private String gameStatus;
 
 	public BlackJack() {
-		this(Hand.getShuffledDeck());
 	}
 
 	public BlackJack(Hand deck) {
 		this.deck = deck;
+		newGame(2);
+	}
+
+	@Override
+	public void start() {
+		deck = Hand.getShuffledDeck();
 		newGame(2);
 	}
 
@@ -109,12 +114,27 @@ public class BlackJack implements CardGame {
 			gameStatus = "No players";
 		} else {
 			//sort highest score first
-			Collections.sort(players, (p1, p2) -> Integer.compare(p2.handValue, p1.handValue));
+
+			//N.B.  the lambda form is cleaner, but not supported by Jersey:  https://java.net/jira/browse/JERSEY-2429
+			//Collections.sort(players, (p1, p2) -> Integer.compare(p2.handValue, p1.handValue));
+			Collections.sort(players, new Comparator<Player>() {
+				@Override
+				public int compare(Player p1, Player p2) {
+					return Integer.compare(p2.handValue, p1.handValue);
+				}
+			});
 			int highScore = players.get(0).handValue;
 			if (highScore < 0) {
 				gameStatus = "All busted";
 			} else {
-				List<String> winners = players.stream().filter(player -> player.handValue == highScore).map(player -> player.name).collect(Collectors.toList());
+				List<String> winners = new ArrayList<>();
+				for (Player player : players) {
+					if (player.handValue == highScore) {
+						winners.add(player.name);
+					} else {
+						break;
+					}
+				}
 				gameStatus = StringUtils.join(winners, ", ");
 			}
 		}
