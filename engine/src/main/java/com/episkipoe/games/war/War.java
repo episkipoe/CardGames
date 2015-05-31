@@ -70,4 +70,12 @@ public class War implements CardGame {
 	public String getGameStatus() {
 		return gameStatus;
 	}
+
+	public Hand getPlayerOne() {
+		return playerOne;
+	}
+
+	public Hand getPlayerTwo() {
+		return playerTwo;
+	}
 }
